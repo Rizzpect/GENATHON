@@ -52,6 +52,12 @@ const dom = {
     btnCapture: $('#btn-capture'),
     btnToggleLive: $('#btn-toggle-live'),
 
+    // Live overlay
+    liveOverlay: $('#live-overlay'),
+    liveStatusBanner: $('#live-status-banner'),
+    livePostureText: $('#live-posture-text'),
+    liveConfidenceText: $('#live-confidence-text'),
+
     // Preview
     previewZone: $('#preview-zone'),
     previewImage: $('#preview-image'),
@@ -266,6 +272,9 @@ function stopCamera() {
 }
 
 function captureFrame() {
+    // Stop live mode if running
+    stopLiveMode();
+
     const video = dom.cameraVideo;
     const canvas = dom.cameraCanvas;
     canvas.width = video.videoWidth;
@@ -274,11 +283,14 @@ function captureFrame() {
     ctx.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
-    // Show in preview
+    // Show in preview and auto-analyze
     dom.previewImage.src = dataUrl;
     dom.cameraZone.style.display = 'none';
     dom.previewZone.style.display = 'flex';
     stopCamera();
+
+    // Auto-trigger analysis
+    analyzeCurrentImage();
 }
 
 function toggleLiveMode() {
@@ -295,10 +307,19 @@ function startLiveMode() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         Stop Live
     `;
-    dom.btnToggleLive.classList.add('active');
+    dom.btnToggleLive.classList.add('live-active');
 
-    // Analyze frames every 1.5 seconds
-    state.liveInterval = setInterval(analyzeLiveFrame, 1500);
+    // Show the live overlay on top of the video
+    if (dom.liveOverlay) {
+        dom.liveOverlay.style.display = 'flex';
+        dom.livePostureText.textContent = 'Analyzing...';
+        dom.liveConfidenceText.textContent = '--';
+        dom.liveStatusBanner.className = 'live-status-banner';
+    }
+
+    // Analyze frames every 1 second
+    analyzeLiveFrame(); // immediate first analysis
+    state.liveInterval = setInterval(analyzeLiveFrame, 1000);
 }
 
 function stopLiveMode() {
@@ -309,9 +330,14 @@ function stopLiveMode() {
     }
     dom.btnToggleLive.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Live Mode
+        Start Live Analysis
     `;
-    dom.btnToggleLive.classList.remove('active');
+    dom.btnToggleLive.classList.remove('live-active');
+
+    // Hide the live overlay
+    if (dom.liveOverlay) {
+        dom.liveOverlay.style.display = 'none';
+    }
 }
 
 async function analyzeLiveFrame() {
@@ -335,6 +361,17 @@ async function analyzeLiveFrame() {
 
         const data = await res.json();
         if (data.posture && data.posture !== 'unknown') {
+            const isGood = data.posture === 'Good';
+            const confPercent = Math.round(data.confidence * 100);
+
+            // Update LIVE overlay on the video
+            if (dom.liveOverlay) {
+                dom.livePostureText.textContent = isGood ? '✓ Good Posture' : '✗ Bad Posture';
+                dom.liveConfidenceText.textContent = `${confPercent}%`;
+                dom.liveStatusBanner.className = `live-status-banner ${isGood ? 'good' : 'bad'}`;
+            }
+
+            // Also update the results panel
             showResults({
                 posture: data.posture,
                 confidence: data.confidence,

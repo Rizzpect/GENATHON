@@ -136,19 +136,32 @@
 
                 <!-- Camera Mode -->
                 <div class="camera-zone" id="camera-zone" style="display: none;">
-                    <video id="camera-video" autoplay playsinline muted></video>
-                    <canvas id="camera-canvas" style="display: none;"></canvas>
-                    <div class="camera-overlay" id="camera-overlay">
-                        <div class="camera-guide"></div>
+                    <div class="camera-feed-wrapper">
+                        <video id="camera-video" autoplay playsinline muted></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                        <div class="camera-overlay" id="camera-overlay">
+                            <div class="camera-guide"></div>
+                        </div>
+                        <!-- Live Posture Overlay (shown on top of video) -->
+                        <div class="live-overlay" id="live-overlay" style="display: none;">
+                            <div class="live-status-banner" id="live-status-banner">
+                                <div class="live-indicator">
+                                    <span class="live-dot"></span>
+                                    LIVE
+                                </div>
+                                <div class="live-posture" id="live-posture-text">Analyzing...</div>
+                                <div class="live-confidence" id="live-confidence-text">--</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="camera-controls">
                         <button class="btn btn-primary" id="btn-capture">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-                            Capture
+                            Capture &amp; Analyze
                         </button>
                         <button class="btn btn-ghost" id="btn-toggle-live">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                            Live Mode
+                            Start Live Analysis
                         </button>
                     </div>
                 </div>

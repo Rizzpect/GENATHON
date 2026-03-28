@@ -684,6 +684,107 @@ body {
     background: rgba(0,0,0,0.5);
 }
 
+/* Camera Feed Wrapper */
+.camera-feed-wrapper {
+    position: relative;
+    flex: 1;
+    min-height: 300px;
+    background: #000;
+}
+
+.camera-feed-wrapper #camera-video {
+    min-height: 300px;
+}
+
+.camera-feed-wrapper .camera-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Live Overlay — shown on top of the video */
+.live-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px;
+}
+
+.live-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.4s var(--ease-out);
+}
+
+.live-status-banner.good {
+    border-color: rgba(52,211,153,0.4);
+    box-shadow: 0 0 20px rgba(52,211,153,0.15);
+}
+
+.live-status-banner.bad {
+    border-color: rgba(248,113,113,0.4);
+    box-shadow: 0 0 20px rgba(248,113,113,0.15);
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #f87171;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f87171;
+    animation: pulse-dot 1s infinite;
+}
+
+.live-posture {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    transition: color 0.3s ease;
+}
+
+.live-status-banner.good .live-posture { color: var(--good); }
+.live-status-banner.bad .live-posture { color: var(--bad); }
+
+.live-confidence {
+    font-size: 1.2rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
+}
+
+.live-status-banner.good .live-confidence { color: var(--good); }
+.live-status-banner.bad .live-confidence { color: var(--bad); }
+
+/* Active live mode button style */
+.btn-ghost.live-active {
+    background: rgba(248,113,113,0.15);
+    border-color: rgba(248,113,113,0.3);
+    color: #f87171;
+}
+
 /* Preview Zone */
 .preview-zone {
     flex: 1;
