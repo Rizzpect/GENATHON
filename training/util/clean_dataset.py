@@ -1,7 +1,7 @@
 from pathlib import Path
 import shutil
 
-DATA = Path("../../data")
+DATA = Path(__file__).resolve().parents[2] / "data"
 
 def clean_split(split):
     imgs = (DATA / split / "images")
