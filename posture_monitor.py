@@ -184,6 +184,13 @@ class PostureMonitorApp:
         )
         self.confidence_label.pack()
 
+        # Feedback hint
+        self.feedback_label = tk.Label(
+            status_card, text="", font=("Segoe UI", 9),
+            fg="#f59e0b", bg=self.BG_CARD, wraplength=270, justify=tk.LEFT
+        )
+        self.feedback_label.pack(pady=(6, 0), anchor="w")
+
         # Confidence bar
         bar_frame = tk.Frame(status_card, bg=self.BG, height=8)
         bar_frame.pack(fill=tk.X, pady=(10, 0))
@@ -191,6 +198,38 @@ class PostureMonitorApp:
 
         self.conf_bar = tk.Frame(bar_frame, bg=self.TEXT_DIM, width=0, height=8)
         self.conf_bar.pack(side=tk.LEFT, fill=tk.Y)
+
+        # ── Posture Guide Card ───────────────────────────────────
+        guide_card = tk.Frame(sidebar, bg=self.BG_CARD, highlightbackground=self.BORDER,
+                              highlightthickness=1, padx=16, pady=12)
+        guide_card.pack(fill=tk.X, pady=(0, 10))
+
+        tk.Label(guide_card, text="POSTURE GUIDE", font=("Segoe UI", 8, "bold"),
+                 fg=self.TEXT_DIM, bg=self.BG_CARD, anchor="w").pack(fill=tk.X, pady=(0, 8))
+
+        guide_row = tk.Frame(guide_card, bg=self.BG_CARD)
+        guide_row.pack(fill=tk.X)
+
+        # Good posture example
+        good_frame = tk.Frame(guide_row, bg=self.BG_CARD)
+        good_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
+        self.guide_good_canvas = tk.Canvas(good_frame, width=120, height=100,
+                                            bg=self.BG_CARD, highlightthickness=0)
+        self.guide_good_canvas.pack()
+        tk.Label(good_frame, text="✓ Good", font=("Segoe UI", 9, "bold"),
+                 fg=self.GOOD, bg=self.BG_CARD).pack()
+
+        # Bad posture example
+        bad_frame = tk.Frame(guide_row, bg=self.BG_CARD)
+        bad_frame.pack(side=tk.RIGHT, expand=True, fill=tk.X)
+        self.guide_bad_canvas = tk.Canvas(bad_frame, width=120, height=100,
+                                           bg=self.BG_CARD, highlightthickness=0)
+        self.guide_bad_canvas.pack()
+        tk.Label(bad_frame, text="✗ Bad", font=("Segoe UI", 9, "bold"),
+                 fg=self.BAD, bg=self.BG_CARD).pack()
+
+        # Draw stick figures after UI renders
+        self.root.after(100, self._draw_posture_guides)
 
         # ── Session Stats ────────────────────────────────────────
         stats_card = tk.Frame(sidebar, bg=self.BG_CARD, highlightbackground=self.BORDER,
@@ -254,6 +293,55 @@ class PostureMonitorApp:
         self.log_text.tag_configure("good", foreground=self.GOOD)
         self.log_text.tag_configure("bad", foreground=self.BAD)
         self.log_text.tag_configure("info", foreground=self.ACCENT)
+
+    def _draw_posture_guides(self):
+        """Draw stick figure posture examples on the guide canvases."""
+        # ── Good posture (upright) ────────────────────────────────
+        c = self.guide_good_canvas
+        c.delete("all")
+        # Head
+        c.create_oval(52, 8, 68, 24, outline=self.GOOD, width=2)
+        # Spine (straight and vertical)
+        c.create_line(60, 24, 60, 60, fill=self.GOOD, width=2)
+        # Shoulders (even, horizontal)
+        c.create_line(38, 36, 82, 36, fill=self.GOOD, width=2)
+        # Shoulder dots
+        c.create_oval(34, 32, 42, 40, fill=self.GOOD, outline=self.GOOD)
+        c.create_oval(78, 32, 86, 40, fill=self.GOOD, outline=self.GOOD)
+        # Hips
+        c.create_line(45, 60, 75, 60, fill=self.GOOD, width=2)
+        # Legs
+        c.create_line(48, 60, 42, 88, fill=self.GOOD, width=2)
+        c.create_line(72, 60, 78, 88, fill=self.GOOD, width=2)
+        # Keypoint dots on torso
+        c.create_oval(56, 42, 64, 50, fill=self.GOOD, outline=self.GOOD)
+        c.create_oval(56, 56, 64, 64, fill=self.GOOD, outline=self.GOOD)
+
+        # ── Bad posture (slouching) ──────────────────────────────
+        c = self.guide_bad_canvas
+        c.delete("all")
+        # Head (forward)
+        c.create_oval(68, 12, 84, 28, outline=self.BAD, width=2)
+        # Spine (curved forward)
+        c.create_line(76, 28, 72, 38, fill=self.BAD, width=2)
+        c.create_line(72, 38, 65, 50, fill=self.BAD, width=2)
+        c.create_line(65, 50, 60, 62, fill=self.BAD, width=2)
+        # Shoulders (uneven, slumped forward)
+        c.create_line(48, 42, 88, 36, fill=self.BAD, width=2)
+        # Shoulder dots
+        c.create_oval(44, 38, 52, 46, fill=self.BAD, outline=self.BAD)
+        c.create_oval(84, 32, 92, 40, fill=self.BAD, outline=self.BAD)
+        # Hips
+        c.create_line(45, 62, 75, 62, fill=self.BAD, width=2)
+        # Legs
+        c.create_line(48, 62, 42, 90, fill=self.BAD, width=2)
+        c.create_line(72, 62, 78, 90, fill=self.BAD, width=2)
+        # Keypoint dots on torso
+        c.create_oval(63, 44, 71, 52, fill=self.BAD, outline=self.BAD)
+        c.create_oval(58, 58, 66, 66, fill=self.BAD, outline=self.BAD)
+        # Correction arrow (shows "pull back")
+        c.create_line(76, 20, 56, 15, fill="#f59e0b", width=1, arrow=tk.LAST)
+        c.create_text(50, 8, text="↑", fill="#f59e0b", font=("Segoe UI", 8))
 
     # ═══════════════════════════════════════════════════════════════
     #  MODEL LOADING
@@ -356,16 +444,30 @@ class PostureMonitorApp:
         result = results[0]
         annotated = result.plot()  # Get frame with skeleton drawn
 
-        # Extract posture classification
+        # Extract posture classification and keypoints
+        class_name = None
+        best_conf = 0
+        keypoints_xy = None
+
         if result.boxes and len(result.boxes) > 0:
             best_idx = result.boxes.conf.argmax().item()
             best_conf = result.boxes.conf[best_idx].item()
             best_cls = int(result.boxes.cls[best_idx].item())
             class_name = self.model.names[best_cls]
 
-            self._update_posture(class_name, best_conf)
-        else:
-            self._update_posture(None, 0)
+            # Extract keypoints for the best detection
+            if result.keypoints is not None and len(result.keypoints) > 0:
+                kpts = result.keypoints[int(best_idx)]
+                if kpts.xy is not None and kpts.xy.shape[-1] >= 2:
+                    keypoints_xy = kpts.xy[0].cpu().numpy()  # Shape: (N, 2)
+                    kpts_conf = None
+                    if kpts.conf is not None:
+                        kpts_conf = kpts.conf[0].cpu().numpy()
+
+        # Draw posture feedback overlay on the annotated frame
+        annotated = self._draw_posture_feedback(annotated, class_name, best_conf, keypoints_xy)
+
+        self._update_posture(class_name, best_conf)
 
         # Calculate FPS
         self.frame_count += 1
@@ -383,6 +485,94 @@ class PostureMonitorApp:
 
         # Schedule next frame (aim for ~30fps but let inference be the bottleneck)
         self.root.after(1, self._process_frame)
+
+    def _draw_posture_feedback(self, frame, class_name, confidence, keypoints_xy):
+        """Draw visual posture correction feedback on the video frame."""
+        h, w = frame.shape[:2]
+
+        if class_name is None:
+            # No detection — show hint text
+            cv2.putText(frame, "No person detected", (w // 2 - 120, h - 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 100, 120), 2)
+            return frame
+
+        is_good = class_name.lower() == "good"
+        conf_pct = int(confidence * 100)
+
+        # Colors (BGR)
+        GREEN = (153, 211, 52)   # #34d399 in BGR
+        RED = (113, 113, 248)     # #f87171 in BGR
+        YELLOW = (0, 158, 245)   # #f59e0b in BGR
+        WHITE = (255, 255, 255)
+        color = GREEN if is_good else RED
+
+        # ── Draw keypoint feedback dots ───────────────────────────
+        if keypoints_xy is not None:
+            keypoint_labels = ["L-Shoulder", "R-Shoulder", "L-Torso", "R-Torso"]
+            for i, (x, y) in enumerate(keypoints_xy):
+                x, y = int(x), int(y)
+                if x == 0 and y == 0:
+                    continue  # Skip invalid keypoints
+
+                # Outer glow ring
+                cv2.circle(frame, (x, y), 12, color, 2, cv2.LINE_AA)
+                # Inner filled dot
+                cv2.circle(frame, (x, y), 6, color, -1, cv2.LINE_AA)
+                # White center
+                cv2.circle(frame, (x, y), 3, WHITE, -1, cv2.LINE_AA)
+
+                # Label each keypoint
+                label = keypoint_labels[i] if i < len(keypoint_labels) else f"KP{i}"
+                cv2.putText(frame, label, (x + 16, y + 4),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1, cv2.LINE_AA)
+
+                # If bad posture, draw upward correction arrows from shoulders
+                if not is_good and i < 2:  # Shoulder keypoints
+                    arrow_len = 40
+                    cv2.arrowedLine(frame, (x, y - 5), (x, y - arrow_len),
+                                   YELLOW, 2, cv2.LINE_AA, tipLength=0.35)
+
+        # ── Status banner at top of frame ────────────────────────
+        banner_h = 50
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (0, 0), (w, banner_h), (0, 0, 0), -1)
+        cv2.addWeighted(overlay, 0.7, frame, 0.3, 0, frame)
+
+        # Status text
+        status_text = "GOOD POSTURE" if is_good else "BAD POSTURE"
+        status_icon = chr(10003) if is_good else "X"  # ✓ or X
+        cv2.putText(frame, f"{status_icon} {status_text}", (16, 34),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2, cv2.LINE_AA)
+
+        # Confidence on right side
+        conf_text = f"{conf_pct}%"
+        (tw, _), _ = cv2.getTextSize(conf_text, cv2.FONT_HERSHEY_SIMPLEX, 0.9, 2)
+        cv2.putText(frame, conf_text, (w - tw - 16, 34),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2, cv2.LINE_AA)
+
+        # ── Correction tips when posture is bad ──────────────────
+        if not is_good:
+            tips = [
+                "Sit up straight — align your spine",
+                "Pull shoulders back and level",
+                "Keep head above shoulders",
+            ]
+            tip_y = h - 20 - (len(tips) - 1) * 28
+
+            # Semi-transparent background for tips
+            tip_overlay = frame.copy()
+            cv2.rectangle(tip_overlay, (0, tip_y - 24), (w, h), (0, 0, 0), -1)
+            cv2.addWeighted(tip_overlay, 0.65, frame, 0.35, 0, frame)
+
+            for i, tip in enumerate(tips):
+                y_pos = tip_y + i * 28
+                # Arrow icon
+                cv2.putText(frame, ">", (12, y_pos),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, YELLOW, 2, cv2.LINE_AA)
+                cv2.putText(frame, tip, (30, y_pos),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 1, cv2.LINE_AA)
+
+        return frame
 
     def _display_frame(self, frame):
         """Convert OpenCV frame to Tkinter-compatible image and display."""
@@ -411,6 +601,7 @@ class PostureMonitorApp:
         if class_name is None:
             self.posture_label.config(text="No Person", fg=self.TEXT_DIM)
             self.confidence_label.config(text="Confidence: --")
+            self.feedback_label.config(text="")
             self.conf_bar.config(width=0)
             return
 
@@ -420,8 +611,16 @@ class PostureMonitorApp:
         # Update posture label
         if is_good:
             self.posture_label.config(text="✓ GOOD", fg=self.GOOD)
+            self.feedback_label.config(
+                text="Great posture! Keep it up.",
+                fg=self.GOOD
+            )
         else:
             self.posture_label.config(text="✗ BAD", fg=self.BAD)
+            self.feedback_label.config(
+                text="⚠ Sit straighter — pull shoulders back and align head over spine.",
+                fg="#f59e0b"
+            )
 
         self.confidence_label.config(
             text=f"Confidence: {conf_pct:.1f}%",
